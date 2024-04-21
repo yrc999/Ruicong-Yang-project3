@@ -9,7 +9,8 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "node server.cjs",
-    "devstart": "concurrently \"nodemon ./server.js\" \"vite\""
+    "devstart": "concurrently \"nodemon ./server.js\" \"vite\"",
+    "prod": "npm run start -w backend"
   },
   "dependencies": {
     "axios": "^1.6.8",
