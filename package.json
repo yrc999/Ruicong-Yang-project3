@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ajorgense1-chwy/cs5610_spr23_mod3.git"
+    "url": "git+https://github.com/yrc999/Ruicong-Yang-project3/tree/main"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ajorgense1-chwy/cs5610_spr23_mod3/issues"
+    "url": "https://github.com/yrc999/Ruicong-Yang-project3/tree/main"
   },
-  "homepage": "https://github.com/ajorgense1-chwy/cs5610_spr23_mod3#readme",
+  "homepage": "https://github.com/yrc999/Ruicong-Yang-project3/tree/main",
   "dependencies": {
   },
   "devDependencies": {

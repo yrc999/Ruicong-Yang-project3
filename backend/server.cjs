@@ -26,7 +26,7 @@ app.use('/api/users', users);
 app.use('/api/passwords', passwords);
 app.use('/api/messages', messages);
 
-let frontend_dir = path.join(__dirname, 'dist')
+let frontend_dir = path.join(__dirname, '..', 'frontend', 'dist')
 
 app.use(express.static(frontend_dir));
 app.get('*', function (req, res) {
