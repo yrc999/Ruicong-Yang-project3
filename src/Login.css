@@ -1,0 +1,47 @@
+.container {
+    max-width: 400px;
+    margin: 40 auto;
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    background-color: white;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid darkcyan;
+    border-radius: 5px;
+}
+
+button {
+    width: 95%;
+    padding: 10px;
+    background-color: cyan;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+@media screen and (max-width: 780px) {
+    .container {
+        max-width: 38%;
+    }
+}
