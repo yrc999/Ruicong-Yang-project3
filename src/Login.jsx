@@ -5,12 +5,13 @@ import { useAuth } from "./AuthProvider";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-export default function Login() {
+function Login() {
     const navigate = useNavigate();
     const { login, isLoggedIn, username, logout } = useAuth();
     const [usernameState, setUsernameState] = useState("");
     const [passwordState, setPasswordState] = useState("");
     const [errorMsgState, setErrorMsgState] = useState("");
+    const [passwordRevealed, setPasswordRevealed] = useState(false);
 
     async function onSubmit() {
         setErrorMsgState("");
@@ -36,6 +37,10 @@ export default function Login() {
         setUsernameState(event.target.value);
     }
 
+    const handleTogglePasswordVisibility = () => {
+        setPasswordRevealed(!passwordRevealed);
+    };
+
     return (
         <div>
             <Nav isLoggedIn={isLoggedIn} username={username} onLogout={logout} />
@@ -51,11 +56,20 @@ export default function Login() {
                 </div>
                 <div>
                     <label>Password:</label>{" "}
-                    <input
-                        type="password"
-                        value={passwordState}
-                        onChange={(event) => updatePassword(event)}
-                    />
+                    <div style={{ position: "relative" }}>
+                        <input
+                            type={passwordRevealed ? "text" : "password"}
+                            value={passwordState}
+                            onChange={(event) => updatePassword(event)}
+                        />
+                        <button
+                            className="show-password-button"
+                            onClick={handleTogglePasswordVisibility}
+                            type="button"
+                        >
+                            {passwordRevealed ? "Hide" : "Show"}
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <button onClick={() => onSubmit()}>Submit</button>
@@ -64,3 +78,5 @@ export default function Login() {
         </div>
     );
 }
+
+export default Login;

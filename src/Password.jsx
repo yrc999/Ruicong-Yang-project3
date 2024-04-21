@@ -13,16 +13,49 @@ function Password() {
     const [symbols, setSymbols] = useState(false);
     const [length, setLength] = useState(8);
     const [passwords, setPasswords] = useState([]);
+    const [messages, setMessages] = useState([]);
     const [error, setError] = useState("");
+    const [sharedPasswords, setSharedPasswords] = useState([]);
+    const [messageReceiver, setMessageReceiver] = useState("");
 
     useEffect(() => {
-        fetchPasswords();
+        fetchPasswords(username);
+        fetchMessages();
+        fetchSharedUsers();
     }, [username]);
 
-    const fetchPasswords = async () => {
+    const fetchSharedUsers = async () => {
+        try {
+            const response = await axios.get(`/api/messages/share?receiver=${username}`);
+            let sharedUsers = response.data;
+            let newSharedPasswords = [];
+            for (let i = 0; i < sharedUsers.length; i++) {
+                try {
+                    const response = await axios.get(`/api/passwords/list?username=${sharedUsers[i].sender}`);
+                    newSharedPasswords = [...newSharedPasswords, ...response.data];
+                } catch (error) {
+                    setError("Failed to fetch shared passwords.");
+                }
+            }
+            setSharedPasswords(newSharedPasswords);
+        } catch (error) {
+            setError("Failed to fetch shared Users.");
+        }
+    }
+
+    const fetchPasswords = async (username) => {
         try {
             const response = await axios.get(`/api/passwords/list?username=${username}`);
             setPasswords(response.data);
+        } catch (error) {
+            setError("Failed to fetch passwords.");
+        }
+    };
+
+    const fetchMessages = async () => {
+        try {
+            const response = await axios.get(`/api/messages/receive?receiver=${username}`);
+            setMessages(response.data);
         } catch (error) {
             setError("Failed to fetch passwords.");
         }
@@ -32,10 +65,44 @@ function Password() {
         const passwordToDelete = passwords[index];
         try {
             await axios.delete(`/api/passwords/delete/${passwordToDelete._id}`);
-            fetchPasswords();
+            fetchPasswords(username);
             setError("");
         } catch (error) {
             setError("Failed to delete password. Try again.");
+        }
+    };
+
+    const handleSendMessage = async (event) => {
+        event.preventDefault();
+        if (!messageReceiver) {
+            setError("Please enter a message receiver.");
+            return;
+        }
+
+        if (messageReceiver === username) {
+            setError("You can't share password with yourself.");
+            return;
+        }
+
+        try {
+            await axios.post("/api/users/check", {
+                receiver: messageReceiver,
+            });
+        } catch (error) {
+            setError("Failed to find users. Try again.");
+            return;
+        }
+
+        try {
+            await axios.post("/api/messages/send", {
+                sender: username,
+                receiver: messageReceiver,
+                accepted: false
+            });
+            setMessageReceiver("");
+            setError("");
+        } catch (error) {
+            setError("Failed to send message. Try again.");
         }
     };
 
@@ -71,6 +138,40 @@ function Password() {
         setPassword(generatePassword());
     };
 
+    const handleAcceptMessage = async (index) => {
+        const messageToUpdate = messages[index];
+        try {
+            await axios.put(`/api/messages/accept/${messageToUpdate._id}`);
+            fetchMessages();
+            fetchSharedUsers();
+            setError("");
+        } catch (error) {
+            setError("Failed to accept share request. Try again.");
+        }
+
+        try {
+            await axios.post("/api/messages/send", {
+                sender: username,
+                receiver: messageToUpdate.sender,
+                accepted: true
+            });
+            setError("");
+        } catch (error) {
+            setError("Failed to accept share request. Try again.");
+        }
+    }
+
+    const handleDeclineMessage = async (index) => {
+        const messageToUpdate = messages[index];
+        try {
+            await axios.delete(`/api/messages/clear/${messageToUpdate._id}`);
+            fetchMessages();
+            setError("");
+        } catch (error) {
+            setError("Failed to decline share request. Try again.");
+        }
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!url) {
@@ -100,7 +201,7 @@ function Password() {
                 url,
                 password: newPassWord
             });
-            fetchPasswords();
+            fetchPasswords(username);
             setUrl("");
             setPassword("");
             setError("");
@@ -113,6 +214,7 @@ function Password() {
         <div>
             <Nav isLoggedIn={isLoggedIn} username={username} onLogout={logout} />
             <div className="blocks">
+                <div className="error">{error && <div>{error}</div>}</div>
                 <div className="container">
                     <form onSubmit={handleSubmit}>
                         <div>
@@ -142,7 +244,6 @@ function Password() {
                             <label>Length:</label>
                             <input type="number" value={length} onChange={(e) => setLength(e.target.value)} />
                         </div>
-                        {error && <div className="error">{error}</div>}
                         <button type="submit">Submit</button>
                     </form>
                 </div>
@@ -157,6 +258,38 @@ function Password() {
                                     <li>{"Date: " + item.updatedAt.substring(0, 10)}</li>
                                     <button className="delete" onClick={() => handleDeletePassword(index)}>Delete</button>
                                 </ul>
+                            </li>
+                        ))}
+                    </ul>
+                    <h2>Shared Password List:</h2>
+                    <ul>
+                        {sharedPasswords.map((item, index) => (
+                            <li key={index}>
+                                <ul>
+                                    <li>{"Username: " + item.username}</li>
+                                    <li>{"Url: " + item.url}</li>
+                                    <li>{"Password: " + item.password}</li>
+                                    <li>{"Date: " + item.updatedAt.substring(0, 10)}</li>
+                                </ul>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="container">
+                    <h2>Message:</h2>
+                    <form onSubmit={handleSendMessage}>
+                        <div>
+                            <label>Send Share Password Request:</label>
+                            <input type="text" value={messageReceiver} onChange={(e) => setMessageReceiver(e.target.value)} />
+                        </div>
+                        <button type="submit">Send</button>
+                    </form>
+                    <ul>
+                        {messages.map((item, index) => (
+                            <li key={index}>
+                                {"Sender: " + item.sender + " willing to share you passwords."}
+                                <button className="accept" onClick={() => handleAcceptMessage(index)}>Accept</button>
+                                <button className="delete" onClick={() => handleDeclineMessage(index)}>Decline</button>
                             </li>
                         ))}
                     </ul>

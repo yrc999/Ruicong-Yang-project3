@@ -37,9 +37,24 @@ router.post('/register', async function(request, response) {
 
 });
 
+router.post('/check', async function(request, response) {
+    const username = request.body.receiver;
+    try {
+        const getUserResponse = await userModel.getUserByUsername(username);
+        if(!getUserResponse) {
+            response.status(400);
+            return response.send('No user found.')
+        }
+        return response.send('Found.');
+    } catch (error) {
+        response.status(400);
+        return response.send('Failed to find users.')
+    }
+});
+
 router.post('/login', async function(request, response) {
     const username = request.body.username;
-    const password = request.body.password
+    const password = request.body.password;
 
     try {
         const getUserResponse = await userModel.getUserByUsername(username);

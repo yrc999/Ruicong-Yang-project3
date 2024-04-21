@@ -1,6 +1,7 @@
 const express = require('express');
 const users = require('./backend/user.api.cjs')
 const passwords = require('./backend/password.api.cjs')
+const messages = require('./backend/message.api.cjs')
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser')
 const path = require('path')
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/users', users);
 app.use('/api/passwords', passwords);
+app.use('/api/messages', messages);
 
 let frontend_dir = path.join(__dirname, 'dist')
 
